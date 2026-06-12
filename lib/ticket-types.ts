@@ -1,4 +1,4 @@
-export type TicketDeliveryMode = "physical" | "manual";
+export type TicketDeliveryMode = "physical" | "virtual" | "manual";
 
 export type TicketType = {
   id: string;
@@ -49,6 +49,18 @@ export const ticketTypes: TicketType[] = [
     requiresScheduling: false,
     closesAt: "Tue Jun 30 2026 11:55 PM",
     bestFor: "5 Men",
+  },
+  {
+    id: "virtual",
+    name: "Virtual Ticket",
+    priceKes: 2500,
+    description: "Online access for men joining from outside Kenya or anyone who cannot attend physically.",
+    isPublic: true,
+    deliveryMode: "virtual",
+    includesZoom: true,
+    requiresScheduling: true,
+    closesAt: "Sat Aug 15 2026 12:00 PM",
+    bestFor: "Outside Kenya",
   },
 ];
 
