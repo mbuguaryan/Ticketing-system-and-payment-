@@ -46,7 +46,10 @@ export default async function PaymentCallbackPage({
 
               <div style={actionRowStyle}>
                 {firstTicket ? (
-                  <Link href={`/ticket/${firstTicket.ticket_code}`} style={primaryButtonStyle}>View Your Ticket</Link>
+                  <>
+                    <Link href={`/ticket/${firstTicket.ticket_code}`} style={primaryButtonStyle}>View Your Ticket</Link>
+                    <a href={`/api/tickets/${firstTicket.ticket_code}/pdf`} style={secondaryButtonStyle}>Download PDF Ticket</a>
+                  </>
                 ) : null}
                 <Link href="/conference/men-conference-2026#tickets" style={secondaryButtonStyle}>Buy Another Ticket</Link>
               </div>
@@ -55,9 +58,9 @@ export default async function PaymentCallbackPage({
                 <div style={noticeStyle}>
                   <strong>Virtual Access</strong>
                   <p style={{ color: "#b8ac97", lineHeight: 1.6, marginBottom: 12 }}>
-                    This order includes virtual access. Use Calendly to coordinate the Zoom access details.
+                    This order includes virtual access. Use the virtual access page for the online access details.
                   </p>
-                  <Link href="/schedule" style={textLinkStyle}>Open Calendly / Zoom Access</Link>
+                  <Link href="/schedule" style={textLinkStyle}>Open Virtual Access Page</Link>
                 </div>
               ) : null}
             </div>
