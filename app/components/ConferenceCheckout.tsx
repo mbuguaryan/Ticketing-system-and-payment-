@@ -22,24 +22,19 @@ export default function ConferenceCheckout() {
     <section
       id="tickets"
       style={{
-        marginTop: 54,
+        marginTop: 34,
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-        gap: 28,
+        gap: 22,
         alignItems: "start",
       }}
     >
       <div>
-        <p style={{ color: "#d6a84f", fontWeight: 800, letterSpacing: 2 }}>TICKETS</p>
-        <h2 style={{ fontSize: "clamp(32px, 5vw, 56px)", lineHeight: 1, margin: "0 0 18px" }}>
-          Choose your ticket
+        <h2 style={{ fontSize: "clamp(30px, 5vw, 52px)", lineHeight: 1, margin: "0 0 18px" }}>
+          Select Ticket
         </h2>
-        <p style={{ color: "#b8ac97", fontSize: 18, lineHeight: 1.6 }}>
-          Tap your preferred ticket, enter your name and email, then complete secure payment.
-          Physical tickets are for KICC Nairobi. Virtual tickets are for online access outside Kenya.
-        </p>
 
-        <div style={{ display: "grid", gap: 14, marginTop: 22 }}>
+        <div style={{ display: "grid", gap: 12 }}>
           {publicTickets.map((ticket) => {
             const selected = ticket.id === selectedTicketId;
 
@@ -70,9 +65,6 @@ export default function ConferenceCheckout() {
                     </p>
                     <h3 style={{ margin: 0, fontSize: 24 }}>{ticket.name}</h3>
                     <p style={{ color: "#b8ac97", margin: "8px 0", fontSize: 16 }}>{ticket.description}</p>
-                    <p style={{ color: "#d6a84f", margin: 0, fontSize: 14 }}>
-                      Closes on {ticket.closesAt}
-                    </p>
                   </div>
 
                   <div style={{ textAlign: "right" }}>
@@ -80,7 +72,7 @@ export default function ConferenceCheckout() {
                       {formatKes(ticket.priceKes)}
                     </strong>
                     <p style={{ color: selected ? "#d6a84f" : "#b8ac97", fontWeight: 900, margin: "8px 0 0" }}>
-                      {selected ? "Selected" : "Tap to select"}
+                      {selected ? "Selected" : "Select"}
                     </p>
                   </div>
                 </div>
@@ -88,19 +80,11 @@ export default function ConferenceCheckout() {
             );
           })}
         </div>
-
-        <div style={virtualNoticeStyle}>
-          <strong style={{ color: "#f7f2e8" }}>Virtual access note:</strong>
-          <p style={{ color: "#b8ac97", margin: "8px 0 0", lineHeight: 1.6 }}>
-            Virtual ticket buyers receive online access instructions after payment confirmation.
-          </p>
-        </div>
       </div>
 
       <form id="checkout-form" action="/api/paystack/initialize" method="POST" style={formStyle}>
-        <p style={{ color: "#d6a84f", margin: 0, fontWeight: 900 }}>SELECTED TICKET</p>
+        <p style={{ color: "#d6a84f", margin: 0, fontWeight: 900 }}>PAYMENT</p>
         <h2 style={{ margin: "8px 0 0" }}>{selectedTicket.name}</h2>
-        <p style={{ color: "#b8ac97", lineHeight: 1.5 }}>{selectedTicket.description}</p>
         <strong style={{ color: "#d6a84f", fontSize: 28 }}>{formatKes(selectedTicket.priceKes)}</strong>
 
         <input type="hidden" name="ticketTypeId" value={selectedTicket.id} />
@@ -140,7 +124,7 @@ export default function ConferenceCheckout() {
         </button>
 
         <p style={{ color: "#b8ac97", textAlign: "center", fontSize: 13, lineHeight: 1.5, marginTop: 14 }}>
-          Secure payment. Your QR or virtual ticket is issued after payment confirmation.
+          Your secure ticket is issued after payment confirmation.
         </p>
       </form>
     </section>
@@ -185,12 +169,4 @@ const submitButtonStyle = {
   fontSize: 17,
   cursor: "pointer",
   marginTop: 20,
-} as const;
-
-const virtualNoticeStyle = {
-  border: "1px solid #3a2b14",
-  borderRadius: 22,
-  padding: 20,
-  background: "rgba(17, 24, 39, .55)",
-  marginTop: 18,
 } as const;
