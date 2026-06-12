@@ -43,7 +43,7 @@ export default function ConferencePage() {
                 fontWeight: 800,
               }}
             >
-              Sat 15 Aug 2026 · KICC Nairobi · Gates Open 12PM
+              Sat 15 Aug 2026 · KICC Nairobi · Virtual Access Available
             </p>
 
             <h1
@@ -59,7 +59,8 @@ export default function ConferencePage() {
 
             <p style={{ color: "#d8c9ae", fontSize: 20, lineHeight: 1.6, maxWidth: 680 }}>
               A powerful men’s gathering focused on leadership, purpose, mindset, family, faith,
-              emotional strength, and becoming a better man.
+              emotional strength, and becoming a better man. Attend live at KICC Nairobi or join
+              virtually from outside Kenya through Zoom access coordinated with Calendly.
             </p>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 26 }}>
@@ -76,9 +77,9 @@ export default function ConferencePage() {
                 maxWidth: 680,
               }}
             >
-              <StatCard label="Venue" value="KICC Nairobi" />
+              <StatCard label="Physical" value="KICC Nairobi" />
+              <StatCard label="Virtual" value="Zoom Access" />
               <StatCard label="Date" value="15 Aug 2026" />
-              <StatCard label="From" value="12PM" />
             </div>
           </div>
 
@@ -115,8 +116,8 @@ export default function ConferencePage() {
               Get your tickets
             </h2>
             <p style={{ color: "#b8ac97", fontSize: 18, lineHeight: 1.6 }}>
-              Kindly indicate how many tickets you would like. Early Bird closes on Tue Jun 30 2026
-              at 11:59 PM.
+              Kindly choose your ticket type and quantity. Physical tickets are for KICC Nairobi.
+              Virtual tickets are for men joining online from outside Kenya or those who cannot travel.
             </p>
 
             <div style={{ display: "grid", gap: 14, marginTop: 22 }}>
@@ -129,11 +130,16 @@ export default function ConferencePage() {
                       border: "1px solid #3a2b14",
                       borderRadius: 22,
                       padding: 20,
-                      background: "linear-gradient(135deg, #18100a 0%, #0b0806 100%)",
+                      background: ticket.deliveryMode === "virtual"
+                        ? "linear-gradient(135deg, #1a1308 0%, #111827 100%)"
+                        : "linear-gradient(135deg, #18100a 0%, #0b0806 100%)",
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
                       <div>
+                        <p style={{ color: "#d6a84f", margin: "0 0 8px", fontSize: 13, fontWeight: 800 }}>
+                          {ticket.deliveryMode === "virtual" ? "ONLINE / INTERNATIONAL" : ticket.bestFor}
+                        </p>
                         <h3 style={{ margin: 0, fontSize: 24 }}>{ticket.name}</h3>
                         <p style={{ color: "#b8ac97", margin: "8px 0" }}>{ticket.description}</p>
                         <p style={{ color: "#d6a84f", margin: 0, fontSize: 14 }}>
@@ -146,6 +152,17 @@ export default function ConferencePage() {
                     </div>
                   </article>
                 ))}
+            </div>
+
+            <div style={virtualNoticeStyle}>
+              <strong style={{ color: "#f7f2e8" }}>Virtual access note:</strong>
+              <p style={{ color: "#b8ac97", margin: "8px 0 0", lineHeight: 1.6 }}>
+                Virtual ticket buyers will receive online access details after payment confirmation.
+                Calendly will be used to coordinate the Zoom access/session details where needed.
+              </p>
+              <a href="/schedule" style={{ color: "#d6a84f", fontWeight: 800, display: "inline-flex", marginTop: 10 }}>
+                View Calendly scheduling options
+              </a>
             </div>
           </div>
 
@@ -164,7 +181,7 @@ export default function ConferencePage() {
 
             <label style={labelStyle}>
               Phone Number
-              <input name="phone" required placeholder="07..." style={inputStyle} />
+              <input name="phone" required placeholder="07... or international number" style={inputStyle} />
             </label>
 
             <label style={labelStyle}>
@@ -192,13 +209,13 @@ export default function ConferencePage() {
 
             <label style={checkboxStyle}>
               <input type="checkbox" name="marketingOptIn" style={{ marginTop: 3 }} />
-              I accept to receive Men’s Conference updates.
+              I accept to receive Men’s Conference updates, including virtual access instructions where applicable.
             </label>
 
             <button type="submit" style={submitButtonStyle}>Book Now</button>
 
             <p style={{ color: "#b8ac97", textAlign: "center", fontSize: 13, lineHeight: 1.5, marginTop: 14 }}>
-              Secure checkout powered by Paystack. Your QR ticket is issued after payment confirmation.
+              Secure checkout powered by Paystack. Your QR or virtual ticket is issued after payment confirmation.
             </p>
           </form>
         </section>
@@ -291,4 +308,12 @@ const submitButtonStyle = {
   fontSize: 17,
   cursor: "pointer",
   marginTop: 20,
+} as const;
+
+const virtualNoticeStyle = {
+  border: "1px solid #3a2b14",
+  borderRadius: 22,
+  padding: 20,
+  background: "rgba(17, 24, 39, .55)",
+  marginTop: 18,
 } as const;
