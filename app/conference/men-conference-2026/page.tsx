@@ -73,4 +73,4 @@ const inputStyle = {
   background: "#0f0d09",
   color: "#f7f2e8",
   fontSize: 16,
-};
+} as const;
