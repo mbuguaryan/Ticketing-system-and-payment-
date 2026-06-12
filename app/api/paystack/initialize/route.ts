@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeCheckoutInput, validateCheckoutInput } from "@/lib/checkout";
 import { initializePaystackTransaction } from "@/lib/paystack";
-import { getTicketType } from "@/lib/ticket-types";
+import { attachPaystackInitialization, createTicketOrder } from "@/lib/ticketing";
 
 function buildErrorRedirect(request: NextRequest, message: string) {
   const url = new URL("/conference/men-conference-2026", request.url);
@@ -20,29 +20,49 @@ export async function POST(request: NextRequest) {
       return buildErrorRedirect(request, validationError);
     }
 
-    const ticketType = getTicketType(input.ticketTypeId);
+    const created = await createTicketOrder({
+      ticketTypeCode: input.ticketTypeId,
+      quantity: input.quantity,
+      buyerFullName: input.fullName,
+      buyerEmail: input.email,
+      buyerPhone: input.phone,
+      marketingOptIn: rawInput.marketingOptIn === "on",
+    });
 
-    if (!ticketType || ticketType.priceKes <= 0) {
-      return buildErrorRedirect(request, "Please select a valid paid ticket type.");
-    }
-
-    const totalAmountKes = ticketType.priceKes * input.quantity;
-    const reference = `MNC2026-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const reference = `MNC2026-${Date.now()}-${created.order.id.slice(0, 8).toUpperCase()}`;
     const callbackUrl = process.env.PAYSTACK_CALLBACK_URL || `${process.env.APP_BASE_URL || request.nextUrl.origin}/payment/callback`;
 
     const transaction = await initializePaystackTransaction({
       email: input.email,
-      amountKes: totalAmountKes,
+      amountKes: created.amountKes,
       reference,
       callbackUrl,
       metadata: {
-        event: "Men Conference Nairobi 2026",
+        event: created.event.name,
+        eventSlug: created.event.slug,
+        orderId: created.order.id,
+        ticketTypeCode: created.ticketType.code,
+        ticketTypeName: created.ticketType.name,
+        deliveryMode: created.ticketType.delivery_mode,
+        requiresScheduling: created.ticketType.requires_scheduling,
+        includesZoom: created.ticketType.includes_zoom,
         fullName: input.fullName,
         phone: input.phone,
-        ticketTypeId: input.ticketTypeId,
-        ticketTypeName: ticketType.name,
         quantity: input.quantity,
-        totalAmountKes,
+        totalAmountKes: created.amountKes,
+      },
+    });
+
+    await attachPaystackInitialization({
+      orderId: created.order.id,
+      reference: transaction.reference,
+      accessCode: transaction.access_code,
+      authorizationUrl: transaction.authorization_url,
+      amountKobo: created.amountKes * 100,
+      payload: {
+        access_code: transaction.access_code,
+        authorization_url: transaction.authorization_url,
+        reference: transaction.reference,
       },
     });
 
