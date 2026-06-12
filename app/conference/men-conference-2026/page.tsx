@@ -1,16 +1,19 @@
+import TicketingAssistant from "@/app/components/TicketingAssistant";
 import { formatKes, ticketTypes } from "@/lib/ticket-types";
 
 export default function ConferencePage() {
   return (
     <main style={{ minHeight: "100vh", padding: 32, background: "#080808", color: "#f7f2e8", fontFamily: "Arial, sans-serif" }}>
       <section style={{ maxWidth: 1120, margin: "0 auto" }}>
-        <p style={{ color: "#d6a84f", fontWeight: 700 }}>Saturday 15 August 2026 · KICC Nairobi</p>
+        <p style={{ color: "#d6a84f", fontWeight: 700 }}>Saturday 15 August 2026 · KICC Nairobi + Virtual Zoom Access</p>
         <h1 style={{ fontSize: "clamp(40px, 7vw, 76px)", lineHeight: 0.95, margin: "12px 0" }}>
           Book Your Men Conference Ticket
         </h1>
         <p style={{ color: "#b8ac97", fontSize: 18, lineHeight: 1.6, maxWidth: 760 }}>
-          Choose your ticket, enter your details, and complete payment securely through Paystack. Your QR ticket is issued only after payment is verified.
+          Choose physical or virtual access, pay securely through Paystack, then use the assistant for ticket help, Zoom access, group booking, and scheduling.
         </p>
+
+        <TicketingAssistant />
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16, margin: "32px 0" }}>
           {ticketTypes.map((ticket) => (
@@ -20,6 +23,9 @@ export default function ConferencePage() {
               <strong style={{ color: "#d6a84f", fontSize: 28 }}>
                 {ticket.priceKes > 0 ? formatKes(ticket.priceKes) : "Contact Admin"}
               </strong>
+              <p style={{ color: "#b8ac97" }}>
+                {ticket.includesZoom ? "Includes Zoom access" : "In-person access"}
+              </p>
             </article>
           ))}
         </div>
