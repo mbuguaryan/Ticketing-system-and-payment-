@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { verifyPaystackTransaction } from "@/lib/paystack";
+import { finalizePaystackPayment } from "@/lib/ticketing";
 
 export default async function PaymentCallbackPage({
   searchParams,
@@ -12,7 +12,7 @@ export default async function PaymentCallbackPage({
   if (!reference) {
     return (
       <main>
-        <h1>Payment reference missing</h1>
+        <h1>Reference missing</h1>
         <p>Please try again.</p>
         <Link href="/conference/men-conference-2026">Back to tickets</Link>
       </main>
@@ -20,22 +20,18 @@ export default async function PaymentCallbackPage({
   }
 
   try {
-    const transaction = await verifyPaystackTransaction(reference);
-    const paid = transaction.status === "success";
-    const ticketCode = `MNC-${transaction.reference}`;
-    const metadata = transaction.metadata || {};
-    const ticketTypeId = typeof metadata.ticketTypeId === "string" ? metadata.ticketTypeId : "";
-    const showScheduleLink = ticketTypeId === "virtual" || ticketTypeId === "group";
+    const result = await finalizePaystackPayment(reference);
+    const firstTicket = result.tickets[0];
 
     return (
       <main>
-        <h1>{paid ? "Payment Confirmed" : "Payment Not Complete"}</h1>
-        <p>Reference: {transaction.reference}</p>
-        {paid ? (
+        <h1>{result.paid ? "Confirmed" : "Not Complete"}</h1>
+        <p>Reference: {reference}</p>
+        {result.paid ? (
           <div>
-            <p>Your payment has been verified. Your QR ticket is ready.</p>
-            <p><Link href={`/ticket/${ticketCode}`}>View QR Ticket</Link></p>
-            {showScheduleLink ? <p><Link href="/schedule">Open Scheduling</Link></p> : null}
+            <p>Your ticket has been issued.</p>
+            {firstTicket ? <p><Link href={`/ticket/${firstTicket.ticket_code}`}>View Your Ticket</Link></p> : null}
+            {result.requiresScheduling ? <p><Link href="/schedule">Open Calendly / Zoom Access</Link></p> : null}
           </div>
         ) : (
           <Link href="/conference/men-conference-2026">Try Again</Link>
@@ -43,7 +39,7 @@ export default async function PaymentCallbackPage({
       </main>
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to verify payment.";
+    const message = error instanceof Error ? error.message : "Unable to complete request.";
 
     return (
       <main>
