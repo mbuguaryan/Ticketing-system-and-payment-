@@ -28,6 +28,7 @@ export default async function TicketPage({
   const order = ticket.ticket_orders;
   const event = order?.events;
   const isVirtual = ticketType?.delivery_mode === "virtual";
+  const pdfUrl = `/api/tickets/${encodeURIComponent(ticket.ticket_code)}/pdf`;
 
   return (
     <main style={mainStyle}>
@@ -39,26 +40,31 @@ export default async function TicketPage({
 
         <img src={qrDataUrl} alt="Ticket QR code" width="280" height="280" style={{ background: "white", padding: 12, borderRadius: 18, marginTop: 18 }} />
 
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", marginTop: 22 }}>
+          <a href={pdfUrl} style={primaryButtonStyle}>Download PDF Ticket</a>
+          <Link href="/conference/men-conference-2026#tickets" style={secondaryButtonStyle}>Buy Another Ticket</Link>
+        </div>
+
         <div style={{ display: "grid", gap: 10, marginTop: 24, textAlign: "left" }}>
           <Info label="Ticket Code" value={ticket.ticket_code} />
           <Info label="Ticket Type" value={ticketType?.name || "Ticket"} />
           <Info label="Holder" value={ticket.holder_name} />
           <Info label="Status" value={ticket.status} />
           <Info label="Date" value={event?.event_date || "15 August 2026"} />
-          <Info label={isVirtual ? "Access" : "Venue"} value={isVirtual ? "Zoom / Online Access" : event?.venue || "KICC Nairobi"} />
+          <Info label={isVirtual ? "Access" : "Venue"} value={isVirtual ? "Online Access" : event?.venue || "KICC Nairobi"} />
         </div>
 
         {isVirtual ? (
           <div style={{ border: "1px solid #3a2b14", borderRadius: 18, padding: 18, marginTop: 22, textAlign: "left" }}>
             <strong>Virtual access instructions</strong>
             <p style={{ color: "#b8ac97", lineHeight: 1.6 }}>
-              This is a virtual ticket. Open the scheduling page to coordinate the Zoom access details.
+              This is a virtual ticket. Keep your PDF copy and follow the virtual access instructions after confirmation.
             </p>
-            <Link href="/schedule" style={linkStyle}>Open Calendly / Zoom Access</Link>
+            <Link href="/schedule" style={linkStyle}>Open Virtual Access Page</Link>
           </div>
         ) : (
           <p style={{ color: "#b8ac97", lineHeight: 1.6 }}>
-            Present this QR code at the gate. The ticket must be checked in only once.
+            Download the PDF or show this QR code at the gate. The ticket must be checked in only once.
           </p>
         )}
       </section>
@@ -92,6 +98,30 @@ const cardStyle = {
   padding: 28,
   background: "#15120d",
   textAlign: "center",
+} as const;
+
+const primaryButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 999,
+  padding: "14px 20px",
+  background: "#d6a84f",
+  color: "#120d04",
+  fontWeight: 900,
+  textDecoration: "none",
+} as const;
+
+const secondaryButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 999,
+  padding: "14px 20px",
+  border: "1px solid #3a2b14",
+  color: "#f7f2e8",
+  fontWeight: 900,
+  textDecoration: "none",
 } as const;
 
 const linkStyle = {
