@@ -93,7 +93,7 @@ export default function ConferencePage() {
             }}
           >
             <img
-              src="/mens-conference-poster.jpg"
+              src="/mens-conference-poster.svg"
               alt="Men’s Conference 2026 poster"
               style={{ width: "100%", display: "block" }}
             />
