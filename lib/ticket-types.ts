@@ -1,4 +1,4 @@
-export type TicketDeliveryMode = "physical" | "virtual" | "manual";
+export type TicketDeliveryMode = "physical" | "manual";
 
 export type TicketType = {
   id: string;
@@ -9,48 +9,46 @@ export type TicketType = {
   deliveryMode: TicketDeliveryMode;
   includesZoom: boolean;
   requiresScheduling: boolean;
+  closesAt: string;
+  bestFor: string;
 };
 
 export const ticketTypes: TicketType[] = [
   {
     id: "early-bird",
-    name: "Early Bird Physical Ticket",
+    name: "Early Bird",
     priceKes: 2500,
-    description: "Early Bird access for the in-person Men Conference Nairobi 2026 experience at KICC.",
+    description: "Single in-person access at KICC Nairobi.",
     isPublic: true,
     deliveryMode: "physical",
     includesZoom: false,
     requiresScheduling: false,
+    closesAt: "Tue Jun 30 2026 11:59 PM",
+    bestFor: "1 Man",
   },
   {
-    id: "virtual",
-    name: "Virtual Ticket",
-    priceKes: 2500,
-    description: "Virtual access for attendees joining online through the official Zoom session.",
-    isPublic: true,
-    deliveryMode: "virtual",
-    includesZoom: true,
-    requiresScheduling: true,
-  },
-  {
-    id: "vip",
-    name: "VIP",
-    priceKes: 5000,
-    description: "Priority conference access and premium experience.",
+    id: "two-men",
+    name: "2 Men",
+    priceKes: 4500,
+    description: "Bring one brother, friend, colleague, son, or partner.",
     isPublic: true,
     deliveryMode: "physical",
     includesZoom: false,
     requiresScheduling: false,
+    closesAt: "Tue Jun 30 2026 11:55 PM",
+    bestFor: "2 Men",
   },
   {
-    id: "group",
-    name: "Group Ticket",
-    priceKes: 0,
-    description: "For churches, teams, organizations, and group leaders. Contact admin for pricing.",
+    id: "five-men",
+    name: "5 Men",
+    priceKes: 10000,
+    description: "Best for teams, churches, families, and men’s groups.",
     isPublic: true,
-    deliveryMode: "manual",
+    deliveryMode: "physical",
     includesZoom: false,
-    requiresScheduling: true,
+    requiresScheduling: false,
+    closesAt: "Tue Jun 30 2026 11:55 PM",
+    bestFor: "5 Men",
   },
 ];
 
