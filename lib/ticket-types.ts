@@ -1,32 +1,46 @@
+export type TicketDeliveryMode = "physical" | "virtual" | "manual";
+
 export type TicketType = {
   id: string;
   name: string;
   priceKes: number;
   description: string;
   isPublic: boolean;
+  deliveryMode: TicketDeliveryMode;
+  includesZoom: boolean;
+  requiresScheduling: boolean;
 };
 
 export const ticketTypes: TicketType[] = [
   {
     id: "early-bird",
-    name: "Early Bird",
-    priceKes: 1000,
-    description: "Limited early access ticket for Men Conference Nairobi 2026.",
+    name: "Early Bird Physical Ticket",
+    priceKes: 2500,
+    description: "Early Bird access for the in-person Men Conference Nairobi 2026 experience at KICC.",
     isPublic: true,
+    deliveryMode: "physical",
+    includesZoom: false,
+    requiresScheduling: false,
   },
   {
-    id: "regular",
-    name: "Regular",
-    priceKes: 1500,
-    description: "Standard conference access ticket.",
+    id: "virtual",
+    name: "Virtual Ticket",
+    priceKes: 2500,
+    description: "Virtual access for attendees joining online through the official Zoom session.",
     isPublic: true,
+    deliveryMode: "virtual",
+    includesZoom: true,
+    requiresScheduling: true,
   },
   {
     id: "vip",
     name: "VIP",
-    priceKes: 3000,
-    description: "Priority conference access and VIP experience.",
+    priceKes: 5000,
+    description: "Priority conference access and premium experience.",
     isPublic: true,
+    deliveryMode: "physical",
+    includesZoom: false,
+    requiresScheduling: false,
   },
   {
     id: "group",
@@ -34,6 +48,9 @@ export const ticketTypes: TicketType[] = [
     priceKes: 0,
     description: "For churches, teams, organizations, and group leaders. Contact admin for pricing.",
     isPublic: true,
+    deliveryMode: "manual",
+    includesZoom: false,
+    requiresScheduling: true,
   },
 ];
 
