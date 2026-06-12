@@ -23,13 +23,20 @@ export default async function PaymentCallbackPage({
     const transaction = await verifyPaystackTransaction(reference);
     const paid = transaction.status === "success";
     const ticketCode = `MNC-${transaction.reference}`;
+    const metadata = transaction.metadata || {};
+    const ticketTypeId = typeof metadata.ticketTypeId === "string" ? metadata.ticketTypeId : "";
+    const showScheduleLink = ticketTypeId === "virtual" || ticketTypeId === "group";
 
     return (
       <main>
         <h1>{paid ? "Payment Confirmed" : "Payment Not Complete"}</h1>
         <p>Reference: {transaction.reference}</p>
         {paid ? (
-          <Link href={`/ticket/${ticketCode}`}>View QR Ticket</Link>
+          <div>
+            <p>Your payment has been verified. Your QR ticket is ready.</p>
+            <p><Link href={`/ticket/${ticketCode}`}>View QR Ticket</Link></p>
+            {showScheduleLink ? <p><Link href="/schedule">Open Scheduling</Link></p> : null}
+          </div>
         ) : (
           <Link href="/conference/men-conference-2026">Try Again</Link>
         )}
