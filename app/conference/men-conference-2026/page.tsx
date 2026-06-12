@@ -58,9 +58,9 @@ export default function ConferencePage() {
             </h1>
 
             <p style={{ color: "#d8c9ae", fontSize: 20, lineHeight: 1.6, maxWidth: 680 }}>
-              A powerful men’s gathering focused on leadership, purpose, mindset, family, faith,
-              emotional strength, and becoming a better man. Attend live at KICC Nairobi or join
-              virtually from outside Kenya through Zoom access coordinated with Calendly.
+              A powerful men’s gathering for men ready to rise in leadership, purpose, mindset,
+              family, faith, and brotherhood. Come sharpen your vision, strengthen your confidence,
+              and leave with the clarity to become a better man.
             </p>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 26 }}>
@@ -78,7 +78,7 @@ export default function ConferencePage() {
               }}
             >
               <StatCard label="Physical" value="KICC Nairobi" />
-              <StatCard label="Virtual" value="Zoom Access" />
+              <StatCard label="Virtual" value="Online Access" />
               <StatCard label="Date" value="15 Aug 2026" />
             </div>
           </div>
