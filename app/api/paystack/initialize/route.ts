@@ -4,9 +4,13 @@ import { initializePaystackTransaction } from "@/lib/paystack";
 import { attachPaystackInitialization, createTicketOrder } from "@/lib/ticketing";
 
 function buildErrorRedirect(request: NextRequest, message: string) {
-  const url = new URL("/conference/men-conference-2026", request.url);
+  const url = new URL("/conference/men-conference-2026#tickets", request.url);
   url.searchParams.set("error", message);
-  return NextResponse.redirect(url);
+  return NextResponse.redirect(url, { status: 303 });
+}
+
+export async function GET(request: NextRequest) {
+  return buildErrorRedirect(request, "Please choose a ticket and complete the checkout form.");
 }
 
 export async function POST(request: NextRequest) {
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.redirect(transaction.authorization_url);
+    return NextResponse.redirect(transaction.authorization_url, { status: 303 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to initialize payment.";
     return buildErrorRedirect(request, message);
