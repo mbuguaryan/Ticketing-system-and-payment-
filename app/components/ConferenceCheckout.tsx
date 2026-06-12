@@ -35,7 +35,7 @@ export default function ConferenceCheckout() {
           Choose your ticket
         </h2>
         <p style={{ color: "#b8ac97", fontSize: 18, lineHeight: 1.6 }}>
-          Tap your preferred ticket, enter your details, then proceed to secure Paystack checkout.
+          Tap your preferred ticket, enter your name and email, then complete secure payment.
           Physical tickets are for KICC Nairobi. Virtual tickets are for online access outside Kenya.
         </p>
 
@@ -92,8 +92,7 @@ export default function ConferenceCheckout() {
         <div style={virtualNoticeStyle}>
           <strong style={{ color: "#f7f2e8" }}>Virtual access note:</strong>
           <p style={{ color: "#b8ac97", margin: "8px 0 0", lineHeight: 1.6 }}>
-            Virtual ticket buyers receive online access instructions after Paystack payment confirmation.
-            Calendly will be used to coordinate the Zoom access/session details where needed.
+            Virtual ticket buyers receive online access instructions after payment confirmation.
           </p>
         </div>
       </div>
@@ -105,6 +104,7 @@ export default function ConferenceCheckout() {
         <strong style={{ color: "#d6a84f", fontSize: 28 }}>{formatKes(selectedTicket.priceKes)}</strong>
 
         <input type="hidden" name="ticketTypeId" value={selectedTicket.id} />
+        <input type="hidden" name="phone" value="not-collected" />
 
         <label style={labelStyle}>
           Full Name
@@ -114,11 +114,6 @@ export default function ConferenceCheckout() {
         <label style={labelStyle}>
           Email
           <input name="email" required type="email" placeholder="you@example.com" style={inputStyle} />
-        </label>
-
-        <label style={labelStyle}>
-          Phone Number
-          <input name="phone" required placeholder="07... or international number" style={inputStyle} />
         </label>
 
         <label style={labelStyle}>
@@ -140,22 +135,12 @@ export default function ConferenceCheckout() {
           <strong style={{ color: "#d6a84f", fontSize: 30 }}>{formatKes(totalAmount)}</strong>
         </div>
 
-        <label style={checkboxStyle}>
-          <input type="checkbox" required style={{ marginTop: 3 }} />
-          I have read and agree to the Privacy Policy and Terms & Conditions.
-        </label>
-
-        <label style={checkboxStyle}>
-          <input type="checkbox" name="marketingOptIn" style={{ marginTop: 3 }} />
-          I accept to receive Men’s Conference updates, including virtual access instructions where applicable.
-        </label>
-
         <button type="submit" style={submitButtonStyle}>
-          Pay {formatKes(totalAmount)} via Paystack
+          Pay {formatKes(totalAmount)}
         </button>
 
         <p style={{ color: "#b8ac97", textAlign: "center", fontSize: 13, lineHeight: 1.5, marginTop: 14 }}>
-          Secure checkout powered by Paystack. Your QR or virtual ticket is issued after payment confirmation.
+          Secure payment. Your QR or virtual ticket is issued after payment confirmation.
         </p>
       </form>
     </section>
@@ -187,16 +172,6 @@ const inputStyle = {
   background: "#090706",
   color: "#f7f2e8",
   fontSize: 16,
-} as const;
-
-const checkboxStyle = {
-  display: "flex",
-  gap: 10,
-  alignItems: "flex-start",
-  color: "#cbbda2",
-  fontSize: 14,
-  lineHeight: 1.5,
-  marginTop: 12,
 } as const;
 
 const submitButtonStyle = {
