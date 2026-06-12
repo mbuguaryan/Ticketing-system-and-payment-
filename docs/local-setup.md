@@ -36,7 +36,23 @@ PAYSTACK_CALLBACK_URL=http://localhost:3000/payment/callback
 APP_BASE_URL=http://localhost:3000
 ```
 
-## 5. Run locally
+## 5. Add Calendly links
+
+For the first version, Calendly is used through direct event links. Replace these with the real event-type URLs from your Calendly account.
+
+```env
+NEXT_PUBLIC_CALENDLY_VIRTUAL_EVENT_URL=https://calendly.com/keithmuoki
+NEXT_PUBLIC_CALENDLY_GROUP_TICKET_URL=https://calendly.com/keithmuoki
+NEXT_PUBLIC_CALENDLY_SUPPORT_URL=https://calendly.com/keithmuoki
+```
+
+Connect Zoom inside Calendly so scheduled virtual sessions can automatically receive Zoom links.
+
+```env
+ZOOM_MODE=calendly_zoom
+```
+
+## 6. Run locally
 
 ```bash
 npm run dev
@@ -48,16 +64,19 @@ Open:
 http://localhost:3000
 ```
 
-## 6. Test flow
+## 7. Test flow
 
 1. Open `/conference/men-conference-2026`.
-2. Fill in the buyer details.
-3. Click `Proceed to Paystack`.
-4. Complete a Paystack test payment.
-5. Paystack redirects to `/payment/callback`.
-6. The app verifies the payment.
-7. The app shows a QR ticket page.
+2. Ask the ticketing assistant about Early Bird, Virtual, Zoom, group tickets, or payment.
+3. Choose Early Bird Physical Ticket or Virtual Ticket.
+4. Fill in the buyer details.
+5. Click `Proceed to Paystack`.
+6. Complete a Paystack test payment.
+7. Paystack redirects to `/payment/callback`.
+8. The app verifies the payment.
+9. The app shows a QR ticket page.
+10. Virtual and group-ticket buyers can open `/schedule` for Calendly/Zoom scheduling.
 
 ## Notes
 
-The current version is the first runnable skeleton. Supabase persistence, admin role protection, real order storage, and one-time ticket check-in are the next build phase.
+The current version is the first runnable skeleton. Supabase persistence, admin role protection, real order storage, Calendly webhook storage, Zoom join link storage, and one-time ticket check-in are the next build phase.
