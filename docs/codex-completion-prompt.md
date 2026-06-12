@@ -1,89 +1,106 @@
 # Codex Completion Prompt — Men’s Conference 2026 Ticketing System
 
-You are working in the repository:
+You are working in this repository:
 
 ```text
 mbuguaryan/Ticketing-system-and-payment-
 ```
 
-Build this as a focused one-event ticketing system for **Men’s Conference 2026 Live in Nairobi at KICC**. This is not a general events marketplace. The full website should focus on one conversion goal: sell tickets for Men’s Conference 2026.
+Build this as a focused **one-event ticketing system** for **Men’s Conference 2026 Live in Nairobi at KICC**, with both physical tickets and virtual tickets for attendees outside Kenya.
 
-## Current Business Requirements
+This is not a general events marketplace. Every page should support one conversion goal: sell Men’s Conference 2026 tickets.
 
-Event:
+## Business Context
 
 ```text
-Name: Men’s Conference 2026 Live in Nairobi
+Event: Men’s Conference 2026 Live in Nairobi
 Host: Keith Muoki
 Venue: KICC, Nairobi, Kenya
 Date: Saturday 15 August 2026
-Gates Open: 12PM
+Physical Gates Open: 12PM EAT
+Virtual Access: Zoom access coordinated through Calendly where needed
 Enquiries: 0750 886 617
 Main CTA: Book Now
 Payment: Paystack
 Ticket Delivery: QR ticket after payment confirmation
 ```
 
-Public ticket types:
+## Public Ticket Types
+
+The frontend, Supabase database, and Paystack metadata must use these exact ticket codes:
 
 ```text
-Early Bird — KES 2,500
-2 Men — KES 4,500
-5 Men — KES 10,000
+early-bird — Early Bird — KES 2,500 — Physical KICC access
+two-men — 2 Men — KES 4,500 — Physical KICC access
+five-men — 5 Men — KES 10,000 — Physical KICC access
+virtual — Virtual Ticket — KES 2,500 — Zoom/online access for outside-Kenya buyers
 ```
 
-Do not show virtual ticketing on the main conversion page unless explicitly reintroduced later. The current advertising focus is the physical event at KICC.
+Virtual ticket buyers are people outside Kenya, people unable to travel to Nairobi, or buyers who prefer online access. Do not remove physical ticketing while adding virtual ticketing. The system must support both.
 
 ## Frontend Requirements
 
-The current page is:
+Primary page:
 
 ```text
 app/conference/men-conference-2026/page.tsx
 ```
 
-The homepage should show the same conversion page:
+Homepage:
 
 ```text
 app/page.tsx
 ```
 
-Keep the page structure simple:
+The homepage should show the same Men’s Conference conversion page.
+
+Keep the conversion flow simple:
 
 ```text
 Poster / Hero
 Event details
-Ticket cards
+Physical + Virtual ticket cards
 Buyer details form
 Terms checkbox
 Book Now button
 Payment reassurance
+Calendly/Zoom note for virtual buyers
 ```
 
-The poster should be placed at:
+Poster path:
 
 ```text
 public/mens-conference-poster.jpg
 ```
 
-Use the current poster artwork supplied by the project owner.
+Use the current Men’s Conference poster artwork supplied by the project owner.
 
-Make the page mobile-first and conversion-focused. The design should feel close to TicketSasa’s buying experience: choose ticket quantity, enter details, proceed to payment, receive ticket.
+The page must be mobile-first and conversion-focused. It should feel similar to a clean ticket-buying flow: choose ticket, enter details, proceed to payment, receive ticket.
 
 ## Meta Pixel Requirement
 
-The project owner will place the Meta Pixel code directly. Do not overcomplicate this with a third-party analytics abstraction.
+The project owner will place the Meta Pixel code directly. Do not overcomplicate this with analytics abstractions.
 
 Recommended events:
 
 ```text
 PageView — global
 ViewContent — Men’s Conference page viewed
-InitiateCheckout — Book Now / checkout started
+InitiateCheckout — checkout started
 Purchase — only after Paystack confirms successful payment and ticket is issued
 ```
 
-Important: never fire `Purchase` on button click. Fire `Purchase` only after backend verification confirms Paystack success.
+Never fire `Purchase` on button click. Fire `Purchase` only after backend verification confirms Paystack success.
+
+For virtual tickets, include useful Meta event parameters where possible:
+
+```text
+content_name: Men’s Conference 2026
+content_type: event_ticket
+content_category: physical_ticket OR virtual_ticket
+currency: KES
+value: final order amount
+```
 
 ## Supabase Project
 
@@ -94,19 +111,69 @@ tgxpamjfjieesoayxtrk
 Project name: AI CHATBOT
 ```
 
-The repository already contains migrations. Apply them if they are not already applied:
+Relevant migrations:
 
 ```text
 supabase/migrations/202606120001_initial_ticketing_schema.sql
 supabase/migrations/202606120002_single_event_ticket_types.sql
+supabase/migrations/202606120003_add_virtual_ticket_calendly.sql
 ```
 
-The public database ticket type codes must match the frontend exactly:
+The database must keep these public ticket types visible:
 
 ```text
 early-bird
 two-men
 five-men
+virtual
+```
+
+The `virtual` ticket type must have:
+
+```text
+delivery_mode = virtual
+includes_zoom = true
+requires_scheduling = true
+is_public = true
+```
+
+## Calendly + Zoom Requirements
+
+Calendly is used to coordinate Zoom access/session details for virtual attendees. The current scheduling page is:
+
+```text
+app/schedule/page.tsx
+```
+
+Environment variables:
+
+```env
+NEXT_PUBLIC_CALENDLY_VIRTUAL_EVENT_URL=
+NEXT_PUBLIC_CALENDLY_GROUP_TICKET_URL=
+NEXT_PUBLIC_CALENDLY_SUPPORT_URL=
+CALENDLY_API_TOKEN=
+CALENDLY_WEBHOOK_SIGNING_KEY=
+ZOOM_MODE=calendly_zoom
+```
+
+For the first working version, direct Calendly links are acceptable. For the full version, connect Calendly webhook data to Supabase:
+
+```text
+calendly_schedules.invitee_uri
+calendly_schedules.event_uri
+calendly_schedules.invitee_email
+calendly_schedules.invitee_name
+calendly_schedules.scheduled_start_time
+calendly_schedules.scheduled_end_time
+calendly_schedules.zoom_join_url
+```
+
+After a buyer purchases a virtual ticket, the success flow should clearly show:
+
+```text
+Payment confirmed
+Virtual ticket ready
+Open Calendly/Zoom access instructions
 ```
 
 ## Edge Functions Already Created
@@ -147,11 +214,12 @@ Implement this exact payment flow:
 10. If Paystack status is success and amount/currency/reference match the order, mark order as paid.
 11. Call issue_tickets_for_order(order_id).
 12. Redirect/show QR ticket page.
+13. If the ticket type is virtual, show Calendly/Zoom access instructions.
 ```
 
 ## Paystack Functions To Complete
 
-Complete:
+Complete these functions:
 
 ```text
 initialize-paystack-payment
@@ -177,6 +245,7 @@ Call Paystack transaction initialize endpoint.
 Use amount_kes * 100.
 Currency must be KES.
 Callback URL must come from PAYSTACK_CALLBACK_URL.
+Include order_id and ticket_type_code in Paystack metadata.
 Store Paystack access_code and authorization_url.
 Insert payment_logs row.
 Return authorization_url, access_code, reference, order_id.
@@ -202,6 +271,7 @@ Mark order as paid.
 Insert payment_logs row.
 Call issue_tickets_for_order(order_id).
 Return order and tickets.
+If the ticket type is virtual, return requires_scheduling = true and the Calendly virtual URL.
 ```
 
 ### paystack-webhook
@@ -230,11 +300,12 @@ Do not generate tickets before payment is verified.
 Do not mark orders paid without matching amount and currency.
 Webhook processing must be idempotent.
 Gate check-in must not allow reused tickets.
+Virtual Zoom/Calendly access must only be shown after verified payment.
 ```
 
 ## Frontend Integration
 
-Replace the current plain form POST behavior with a client checkout flow if needed:
+Replace plain form POST behavior with a client checkout flow if needed:
 
 ```text
 Submit form
@@ -243,13 +314,31 @@ POST to initialize-paystack-payment
 window.location.href = authorization_url
 ```
 
-Create a client component if necessary:
+Create this component if necessary:
 
 ```text
 app/components/ConferenceCheckoutForm.tsx
 ```
 
-Keep the UI simple and similar to the current server-rendered page.
+The form must send:
+
+```text
+buyer_full_name
+buyer_email
+buyer_phone
+ticket_type_code
+quantity
+marketing_opt_in
+```
+
+Map frontend ticket IDs to Supabase ticket type codes exactly:
+
+```text
+early-bird
+two-men
+five-men
+virtual
+```
 
 ## Payment Callback Page
 
@@ -265,6 +354,7 @@ It should:
 Read reference from searchParams.
 Call verify-paystack-payment.
 If success, show payment confirmed and link to ticket.
+If ticket is virtual, show Calendly/Zoom access CTA.
 If failed, show a helpful failure message and link back to the event page.
 Fire Meta Purchase only after verified success if Meta Pixel is present.
 ```
@@ -285,9 +375,17 @@ Ticket type
 Holder name
 Ticket code
 QR code
-Venue
+Venue or Virtual Access
 Date
-Instructions: present this at the gate
+Instructions
+```
+
+For virtual tickets, show:
+
+```text
+This is a virtual ticket.
+Zoom/Calendly access details are provided after payment confirmation.
+Open scheduling/access link.
 ```
 
 ## Verification Page
@@ -315,6 +413,7 @@ Keep admin simple:
 Orders
 Tickets
 Payment logs
+Calendly schedules
 Check-in logs
 Attendee export
 ```
@@ -335,6 +434,13 @@ PAYSTACK_WEBHOOK_SECRET=
 PAYSTACK_CALLBACK_URL=http://localhost:3000/payment/callback
 APP_BASE_URL=http://localhost:3000
 
+NEXT_PUBLIC_CALENDLY_VIRTUAL_EVENT_URL=
+NEXT_PUBLIC_CALENDLY_GROUP_TICKET_URL=
+NEXT_PUBLIC_CALENDLY_SUPPORT_URL=
+CALENDLY_API_TOKEN=
+CALENDLY_WEBHOOK_SIGNING_KEY=
+ZOOM_MODE=calendly_zoom
+
 NEXT_PUBLIC_META_PIXEL_ID=
 ```
 
@@ -345,6 +451,8 @@ PAYSTACK_SECRET_KEY=
 PAYSTACK_WEBHOOK_SECRET=
 PAYSTACK_CALLBACK_URL=
 APP_BASE_URL=
+CALENDLY_API_TOKEN=
+CALENDLY_WEBHOOK_SIGNING_KEY=
 ```
 
 ## Acceptance Criteria
@@ -353,17 +461,18 @@ The system is complete when:
 
 ```text
 A buyer can open the Men’s Conference page.
-The buyer can choose Early Bird, 2 Men, or 5 Men.
+The buyer can choose Early Bird, 2 Men, 5 Men, or Virtual Ticket.
 The buyer can enter name, email, phone, and quantity.
 The system creates an order in Supabase.
 The system initializes Paystack and redirects buyer to Paystack.
 The callback verifies payment.
 The order is marked paid only after Paystack confirms success.
 QR tickets are generated after payment only.
-The buyer can view the QR ticket.
-Gate staff can verify and check in a valid ticket.
-A used ticket cannot be checked in again.
-Admin can export attendees.
+Virtual buyers see Calendly/Zoom access instructions after payment.
+The buyer can view the QR or virtual ticket.
+Gate staff can verify and check in a valid physical ticket.
+A used physical ticket cannot be checked in again.
+Admin can export attendees and view virtual buyers separately.
 The page is mobile-friendly.
 Meta Pixel purchase tracking fires only after verified payment.
 ```
@@ -383,10 +492,11 @@ Then test:
 
 ```text
 /conference/men-conference-2026
+/schedule
 /payment/callback
 /ticket/[ticketCode]
 /verify-ticket
 /admin
 ```
 
-Do not add unnecessary complexity. This is a one-event conversion system for Men’s Conference 2026.
+Do not add unnecessary complexity. This is a one-event conversion system for Men’s Conference 2026 with both physical KICC attendance and virtual access for people outside Kenya.
