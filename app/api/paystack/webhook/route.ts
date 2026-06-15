@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { finalizePaystackPayment } from "@/lib/ticketing";
 
 function verifySignature(rawBody: string, signature: string | null) {
   const webhookSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
@@ -32,11 +33,18 @@ export async function POST(request: NextRequest) {
   };
 
   if (event.event === "charge.success" && event.data?.status === "success") {
-    // Next phase: save payment log, mark matching order as paid, and generate tickets in Supabase.
+    if (!event.data.reference) {
+      return NextResponse.json({ ok: false, message: "Payment reference is required." }, { status: 400 });
+    }
+
+    const result = await finalizePaystackPayment(event.data.reference);
+
     return NextResponse.json({
       ok: true,
       handled: true,
       reference: event.data.reference,
+      paid: result.paid,
+      ticketsIssued: result.tickets.length,
     });
   }
 
