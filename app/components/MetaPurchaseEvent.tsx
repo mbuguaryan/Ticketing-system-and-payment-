@@ -30,6 +30,10 @@ export default function MetaPurchaseEvent({
     let attempts = 0;
     let timeoutId: number | undefined;
 
+    const safeContents = contents.length > 0 ? contents : [{ id: "men-conference-2026", quantity: 1 }];
+    const contentIds = safeContents.map((item) => item.id);
+    const numItems = safeContents.reduce((total, item) => total + item.quantity, 0) || 1;
+
     function trackPurchase() {
       attempts += 1;
 
@@ -38,12 +42,15 @@ export default function MetaPurchaseEvent({
           "track",
           "Purchase",
           {
-            value,
+            value: Number(value.toFixed(2)),
             currency,
+            contents: safeContents,
+            content_ids: contentIds,
             content_name: contentName,
             content_type: "product",
-            contents,
-            num_items: contents.reduce((total, item) => total + item.quantity, 0) || 1,
+            content_category: "Event Ticket",
+            num_items: numItems,
+            order_id: eventId,
           },
           { eventID: eventId }
         );
