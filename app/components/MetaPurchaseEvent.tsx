@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+const META_TEST_EVENT_CODE = "TEST36802";
+
 declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
@@ -33,6 +35,7 @@ export default function MetaPurchaseEvent({
           {
             value: Number(value.toFixed(2)),
             currency,
+            test_event_code: META_TEST_EVENT_CODE,
           },
           { eventID: eventId }
         );
