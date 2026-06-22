@@ -28,7 +28,7 @@ export default function MetaPurchaseEvent({
 }: MetaPurchaseEventProps) {
   useEffect(() => {
     let attempts = 0;
-    let timeoutId: ReturnType<typeof window.setTimeout> | undefined;
+    let timeoutId: number | undefined;
 
     function trackPurchase() {
       attempts += 1;
@@ -58,7 +58,7 @@ export default function MetaPurchaseEvent({
     trackPurchase();
 
     return () => {
-      if (timeoutId) {
+      if (timeoutId !== undefined) {
         window.clearTimeout(timeoutId);
       }
     };
