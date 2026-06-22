@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ConferenceCheckout from "@/app/components/ConferenceCheckout";
 
 export default function ConferencePage() {
@@ -20,10 +21,15 @@ export default function ConferencePage() {
             boxShadow: "0 24px 70px rgba(0,0,0,.45)",
           }}
         >
-          <img
+          <Image
             src="/mens-conference-poster.svg"
             alt="Men’s Conference 2026 poster"
-            style={{ width: "100%", display: "block" }}
+            width={900}
+            height={1060}
+            priority
+            unoptimized
+            sizes="(max-width: 960px) 100vw, 960px"
+            style={{ width: "100%", height: "auto", display: "block" }}
           />
         </div>
 
