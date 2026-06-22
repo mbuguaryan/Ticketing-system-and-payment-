@@ -1,5 +1,5 @@
+import Image from "next/image";
 import ConferenceCheckout from "@/app/components/ConferenceCheckout";
-import ConferenceHeroPoster from "@/app/components/ConferenceHeroPoster";
 
 export default function ConferencePage() {
   return (
@@ -21,7 +21,16 @@ export default function ConferencePage() {
             boxShadow: "0 24px 70px rgba(0,0,0,.45)",
           }}
         >
-          <ConferenceHeroPoster />
+          <Image
+            src="/mens-conference-poster.svg"
+            alt="Men’s Conference 2026 poster"
+            width={800}
+            height={943}
+            priority
+            unoptimized
+            sizes="(max-width: 960px) 100vw, 960px"
+            style={{ width: "100%", height: "auto", display: "block" }}
+          />
         </div>
 
         <section style={{ padding: "28px 4px 0" }}>
