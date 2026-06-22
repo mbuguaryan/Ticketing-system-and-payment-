@@ -26,9 +26,6 @@ export default async function PaymentCallbackPage({
   try {
     const result = await finalizePaystackPayment(reference);
     const firstTicket = result.tickets[0];
-    const ticketType = firstTicket?.ticket_types;
-    const ticketName = ticketType?.name || "Men’s Conference 2026 Ticket";
-    const ticketCode = ticketType?.code || "men-conference-2026";
     const orderAmount = Number(result.order.amount_kes || 0);
     const orderCurrency = result.order.currency || "KES";
 
@@ -46,18 +43,7 @@ export default async function PaymentCallbackPage({
 
           {result.paid ? (
             <div>
-              <MetaPurchaseEvent
-                value={orderAmount}
-                currency={orderCurrency}
-                eventId={reference}
-                contentName={ticketName}
-                contents={[
-                  {
-                    id: ticketCode,
-                    quantity: result.tickets.length || 1,
-                  },
-                ]}
-              />
+              <MetaPurchaseEvent value={orderAmount} currency={orderCurrency} eventId={reference} />
 
               <p style={bodyTextStyle}>
                 Thank you. Your payment has been verified and your secure ticket has been issued.
