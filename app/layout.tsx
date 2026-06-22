@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 const META_PIXEL_ID = "3521405174667843";
+const META_TEST_EVENT_CODE = "TEST36802";
 
 export const metadata: Metadata = {
   title: "Men Conference Nairobi 2026 Tickets",
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('init', '${META_PIXEL_ID}');
-            fbq('track', 'PageView');
+            fbq('track', 'PageView', {
+              test_event_code: '${META_TEST_EVENT_CODE}'
+            });
           `}
         </Script>
         <noscript>
