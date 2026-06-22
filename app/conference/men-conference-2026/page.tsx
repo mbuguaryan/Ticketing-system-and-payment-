@@ -11,37 +11,44 @@ export default function ConferencePage() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <section style={{ maxWidth: 960, margin: "0 auto", padding: "18px 14px 64px" }}>
+      <section style={{ maxWidth: 960, margin: "0 auto", padding: "12px 12px 64px" }}>
         <div
           style={{
             border: "1px solid #3a2b14",
-            borderRadius: 24,
+            borderRadius: 22,
             overflow: "hidden",
-            background: "#150f09",
+            background: "#050302",
             boxShadow: "0 24px 70px rgba(0,0,0,.45)",
+            maxWidth: 760,
+            margin: "0 auto",
           }}
         >
           <Image
-            src="/mens-conference-poster.svg"
+            src="/mens-conference-poster.jpeg"
             alt="Men’s Conference 2026 poster"
-            width={800}
-            height={943}
+            width={1360}
+            height={1600}
             priority
-            unoptimized
-            sizes="(max-width: 960px) 100vw, 960px"
-            style={{ width: "100%", height: "auto", display: "block" }}
+            quality={92}
+            sizes="(max-width: 480px) 94vw, (max-width: 960px) 82vw, 760px"
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+              objectFit: "contain",
+            }}
           />
         </div>
 
-        <section style={{ padding: "28px 4px 0" }}>
+        <section style={{ padding: "24px 4px 0" }}>
           <p style={{ color: "#d6a84f", fontWeight: 900, letterSpacing: 2, margin: 0 }}>
             KEITH MUOKI PRESENTS
           </p>
           <h1
             style={{
-              fontSize: "clamp(42px, 10vw, 88px)",
+              fontSize: "clamp(38px, 10vw, 82px)",
               lineHeight: 0.92,
-              margin: "16px 0",
+              margin: "14px 0",
               letterSpacing: -3,
             }}
           >
