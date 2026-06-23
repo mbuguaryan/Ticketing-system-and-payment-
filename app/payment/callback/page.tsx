@@ -1,5 +1,6 @@
 import Link from "next/link";
 import MetaPurchaseEvent from "@/app/components/MetaPurchaseEvent";
+import { sendMetaPurchaseServerEvent } from "@/lib/meta-conversions-api";
 import { finalizePaystackPayment } from "@/lib/ticketing";
 
 export default async function PaymentCallbackPage({
@@ -28,6 +29,17 @@ export default async function PaymentCallbackPage({
     const firstTicket = result.tickets[0];
     const orderAmount = Number(result.order.amount_kes || 0);
     const orderCurrency = result.order.currency || "KES";
+
+    if (result.paid) {
+      await sendMetaPurchaseServerEvent({
+        eventId: reference,
+        value: orderAmount,
+        currency: orderCurrency,
+        email: result.order.buyer_email,
+        phone: result.order.buyer_phone,
+        eventSourceUrl: `${process.env.APP_BASE_URL || "https://mensconference.keithmuoki.com"}/payment/callback?reference=${encodeURIComponent(reference)}`,
+      });
+    }
 
     return (
       <main style={mainStyle}>
