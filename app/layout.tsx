@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 
-const META_PIXEL_ID = "3521405174667843";
+const META_PIXEL_ID = "1303991068337809";
 const META_TEST_EVENT_CODE = "TEST36802";
 
 export const metadata: Metadata = {
