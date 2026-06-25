@@ -27,6 +27,24 @@ type OrderItemRow = {
   ticket_types?: TicketTypeRow | TicketTypeRow[] | null;
 };
 
+type OrderRow = {
+  id: string;
+  buyer_full_name: string;
+  buyer_email: string;
+  status: string;
+  amount_kes: number;
+  created_at: string;
+};
+
+type TicketRow = {
+  id: string;
+  ticket_code: string;
+  holder_name: string;
+  status: string;
+  created_at: string;
+  ticket_types?: { name?: string; delivery_mode?: string } | null;
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
@@ -92,6 +110,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <MetricCard label="Physical Sold" value={String(dashboard.physicalSold)} />
           <MetricCard label="Virtual Sold" value={String(dashboard.virtualSold)} />
           <MetricCard label="Paid Revenue" value={formatKes(dashboard.revenueKes)} />
+          <MetricCard label="Total Orders" value={String(dashboard.totalOrders)} />
+          <MetricCard label="Pending Orders" value={String(dashboard.pendingOrders)} />
+          <MetricCard label="Failed Orders" value={String(dashboard.failedOrders)} />
+          <MetricCard label="Recent Check-ins" value={String(dashboard.recentCheckIns)} />
         </div>
 
         <div style={tableWrapStyle}>
@@ -123,6 +145,65 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         <Link href="/conference/men-conference-2026" style={secondaryButtonStyle}>
           View public ticket page
         </Link>
+        <a href="/admin/export-attendees" style={secondaryButtonStyle}>
+          Export attendees
+        </a>
+
+        <div style={twoColumnGridStyle}>
+          <section>
+            <h2>Recent Orders</h2>
+            <div style={tableWrapStyle}>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <TableHead>Buyer</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.recentOrders.map((order) => (
+                    <tr key={order.id}>
+                      <TableCell>
+                        <strong>{order.buyer_full_name}</strong>
+                        <div style={{ color: "#8f8068", fontSize: 13 }}>{order.buyer_email}</div>
+                      </TableCell>
+                      <TableCell>{order.status}</TableCell>
+                      <TableCell>{formatKes(Number(order.amount_kes || 0))}</TableCell>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h2>Recent Tickets</h2>
+            <div style={tableWrapStyle}>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <TableHead>Ticket</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.recentTickets.map((ticket) => (
+                    <tr key={ticket.id}>
+                      <TableCell>
+                        <strong>{ticket.holder_name}</strong>
+                        <div style={{ color: "#8f8068", fontSize: 13 }}>{ticket.ticket_code}</div>
+                      </TableCell>
+                      <TableCell>{ticket.ticket_types?.name || "Ticket"}</TableCell>
+                      <TableCell>{ticket.status}</TableCell>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </section>
     </AdminShell>
   );
@@ -186,6 +267,36 @@ async function getAdminDashboardData() {
     throw new Error(orderItemsError.message);
   }
 
+  const { data: orders, error: ordersError } = await supabase
+    .from("ticket_orders")
+    .select("id, buyer_full_name, buyer_email, status, amount_kes, created_at")
+    .eq("event_id", event.id)
+    .order("created_at", { ascending: false });
+
+  if (ordersError) {
+    throw new Error(ordersError.message);
+  }
+
+  const { data: recentTickets, error: recentTicketsError } = await supabase
+    .from("tickets")
+    .select("id, ticket_code, holder_name, status, created_at, ticket_types(name, delivery_mode)")
+    .eq("event_id", event.id)
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  if (recentTicketsError) {
+    throw new Error(recentTicketsError.message);
+  }
+
+  const { count: recentCheckIns, error: checkInsError } = await supabase
+    .from("checkin_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("result", "checked_in");
+
+  if (checkInsError) {
+    throw new Error(checkInsError.message);
+  }
+
   const totalsByType = new Map<string, { sold: number; revenueKes: number }>();
 
   for (const item of (orderItems || []) as OrderItemRow[]) {
@@ -214,6 +325,12 @@ async function getAdminDashboardData() {
     physicalSold: rows.filter((row) => row.deliveryMode === "physical").reduce((sum, row) => sum + row.sold, 0),
     virtualSold: rows.filter((row) => row.deliveryMode === "virtual").reduce((sum, row) => sum + row.sold, 0),
     revenueKes: rows.reduce((sum, row) => sum + row.revenueKes, 0),
+    totalOrders: (orders || []).length,
+    pendingOrders: (orders || []).filter((order) => order.status === "pending" || order.status === "payment_initialized").length,
+    failedOrders: (orders || []).filter((order) => order.status === "failed").length,
+    recentOrders: ((orders || []) as OrderRow[]).slice(0, 8),
+    recentTickets: (recentTickets || []) as TicketRow[],
+    recentCheckIns: recentCheckIns || 0,
   };
 }
 
@@ -322,6 +439,13 @@ const summaryGridStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
   gap: 16,
+  marginTop: 28,
+} as const;
+
+const twoColumnGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+  gap: 18,
   marginTop: 28,
 } as const;
 

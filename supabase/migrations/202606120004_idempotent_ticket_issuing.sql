@@ -39,20 +39,32 @@ begin
 
     for i in 1..tickets_to_create loop
       insert into public.tickets (
+        event_id,
         order_id,
         ticket_type_id,
         ticket_code,
+        secure_token_hash,
+        attendee_name,
+        attendee_phone,
+        attendee_email,
         holder_name,
         holder_email,
+        status,
         delivery_mode,
         qr_payload
       )
       values (
+        v_order.event_id,
         p_order_id,
         item.ticket_type_id,
         public.generate_ticket_code(),
+        encode(gen_random_bytes(32), 'hex'),
+        v_order.buyer_full_name,
+        v_order.buyer_phone,
+        v_order.buyer_email,
         v_order.buyer_full_name,
         v_order.buyer_email,
+        'valid',
         item.delivery_mode,
         jsonb_build_object('order_id', p_order_id, 'event_id', v_order.event_id)
       );

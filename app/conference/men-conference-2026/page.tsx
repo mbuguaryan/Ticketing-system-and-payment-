@@ -1,6 +1,45 @@
 import ConferenceCheckout from "@/app/components/ConferenceCheckout";
+import { ticketTypes } from "@/lib/ticket-types";
 
 export default function ConferencePage() {
+  const appBaseUrl = process.env.APP_BASE_URL || "http://localhost:3000";
+  const eventUrl = `${appBaseUrl}/conference/men-conference-2026`;
+  const eventJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: "Men Conference Nairobi 2026",
+    description: "Men's Conference 2026 Live in Nairobi at KICC, hosted by Keith Muoki.",
+    startDate: "2026-08-15T12:00:00+03:00",
+    endDate: "2026-08-15T17:00:00+03:00",
+    eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    url: eventUrl,
+    image: [`${appBaseUrl}/mens-conference-poster.jpeg`],
+    location: {
+      "@type": "Place",
+      name: "KICC Nairobi",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Nairobi",
+        addressCountry: "KE",
+      },
+    },
+    organizer: {
+      "@type": "Organization",
+      name: "Keith Muoki / Kujua Point",
+    },
+    offers: ticketTypes
+      .filter((ticket) => ticket.isPublic && ticket.priceKes > 0)
+      .map((ticket) => ({
+        "@type": "Offer",
+        name: ticket.name,
+        price: ticket.priceKes,
+        priceCurrency: "KES",
+        availability: "https://schema.org/InStock",
+        url: eventUrl,
+      })),
+  };
+
   return (
     <main
       style={{
@@ -10,6 +49,10 @@ export default function ConferencePage() {
         fontFamily: "Arial, sans-serif",
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
       <section style={{ maxWidth: 960, margin: "0 auto", padding: "18px 14px 64px" }}>
         <div
           style={{

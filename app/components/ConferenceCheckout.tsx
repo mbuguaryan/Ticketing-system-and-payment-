@@ -88,7 +88,6 @@ export default function ConferenceCheckout() {
         <strong style={{ color: "#d6a84f", fontSize: 28 }}>{formatKes(selectedTicket.priceKes)}</strong>
 
         <input type="hidden" name="ticketTypeId" value={selectedTicket.id} />
-        <input type="hidden" name="phone" value="not-collected" />
 
         <label style={labelStyle}>
           Full Name
@@ -98,6 +97,11 @@ export default function ConferenceCheckout() {
         <label style={labelStyle}>
           Email
           <input name="email" required type="email" placeholder="you@example.com" style={inputStyle} />
+        </label>
+
+        <label style={labelStyle}>
+          Phone
+          <input name="phone" required type="tel" placeholder="0712 345 678" style={inputStyle} />
         </label>
 
         <label style={labelStyle}>

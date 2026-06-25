@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MetaPurchaseEvent from "@/app/components/MetaPurchaseEvent";
 import { finalizePaystackPayment } from "@/lib/ticketing";
 
 export default async function PaymentCallbackPage({
@@ -25,9 +26,20 @@ export default async function PaymentCallbackPage({
   try {
     const result = await finalizePaystackPayment(reference);
     const firstTicket = result.tickets[0];
+    const virtualTicket = result.tickets.find((ticket) => ticket.ticket_types?.delivery_mode === "virtual");
+    const purchaseValue = Number(result.order?.amount_kes || 0);
+    const contentCategory = virtualTicket ? "virtual_ticket" : "physical_ticket";
 
     return (
       <main style={mainStyle}>
+        {result.paid && purchaseValue > 0 ? (
+          <MetaPurchaseEvent
+            orderId={result.order.id}
+            value={purchaseValue}
+            currency="KES"
+            contentCategory={contentCategory}
+          />
+        ) : null}
         <section style={cardStyle}>
           <p style={eyebrowStyle}>Men’s Conference 2026</p>
           <div style={statusBadgeStyle}>{result.paid ? "Payment Confirmed" : "Payment Not Complete"}</div>
@@ -60,7 +72,12 @@ export default async function PaymentCallbackPage({
                   <p style={{ color: "#b8ac97", lineHeight: 1.6, marginBottom: 12 }}>
                     This order includes virtual access. Use the virtual access page for the online access details.
                   </p>
-                  <Link href="/schedule" style={textLinkStyle}>Open Virtual Access Page</Link>
+                  <Link
+                    href={virtualTicket ? `/schedule?ticketCode=${encodeURIComponent(virtualTicket.ticket_code)}` : "/schedule"}
+                    style={textLinkStyle}
+                  >
+                    Open Virtual Access Page
+                  </Link>
                 </div>
               ) : null}
             </div>

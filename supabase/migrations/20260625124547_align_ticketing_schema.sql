@@ -1,0 +1,2 @@
+-- Schema alignment is applied in 202606120001_initial_ticketing_schema.sql
+-- so dependent ticket type seed migrations can run against the expected columns.

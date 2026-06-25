@@ -60,7 +60,7 @@ export default async function TicketPage({
             <p style={{ color: "#b8ac97", lineHeight: 1.6 }}>
               This is a virtual ticket. Keep your PDF copy and follow the virtual access instructions after confirmation.
             </p>
-            <Link href="/schedule" style={linkStyle}>Open Virtual Access Page</Link>
+            <Link href={`/schedule?ticketCode=${encodeURIComponent(ticket.ticket_code)}`} style={linkStyle}>Open Virtual Access Page</Link>
           </div>
         ) : (
           <p style={{ color: "#b8ac97", lineHeight: 1.6 }}>
