@@ -35,3 +35,46 @@ export const schedulingOptions: SchedulingOption[] = [
 export function getSchedulingOption(id: string) {
   return schedulingOptions.find((option) => option.id === id);
 }
+
+export type CalendlyPrefill = {
+  ticketCode?: string;
+  orderId?: string;
+  buyerName?: string;
+  buyerEmail?: string;
+};
+
+export function buildCalendlyUrl(baseUrl: string, prefill: CalendlyPrefill = {}) {
+  const url = new URL(baseUrl);
+
+  if (prefill.buyerName) {
+    url.searchParams.set("name", prefill.buyerName);
+  }
+
+  if (prefill.buyerEmail) {
+    url.searchParams.set("email", prefill.buyerEmail);
+  }
+
+  if (prefill.ticketCode) {
+    url.searchParams.set("a1", prefill.ticketCode);
+    url.searchParams.set("utm_content", prefill.ticketCode);
+  }
+
+  if (prefill.orderId) {
+    url.searchParams.set("a2", prefill.orderId);
+    url.searchParams.set("utm_term", prefill.orderId);
+  }
+
+  url.searchParams.set("utm_source", "ticketing_app");
+  url.searchParams.set("utm_medium", "virtual_ticket");
+
+  return url.toString();
+}
+
+export function extractZoomJoinUrl(location: unknown) {
+  if (!location || typeof location !== "object") return null;
+
+  const record = location as Record<string, unknown>;
+  const joinUrl = record.join_url || record.joinUrl || record.url;
+
+  return typeof joinUrl === "string" && joinUrl.startsWith("http") ? joinUrl : null;
+}

@@ -27,10 +27,12 @@ export default async function PaymentCallbackPage({
   try {
     const result = await finalizePaystackPayment(reference);
     const firstTicket = result.tickets[0];
-    const orderAmount = Number(result.order.amount_kes || 0);
-    const orderCurrency = result.order.currency || "KES";
+    const virtualTicket = result.tickets.find((ticket) => ticket.ticket_types?.delivery_mode === "virtual");
+    const orderAmount = Number(result.order?.amount_kes || 0);
+    const orderCurrency = result.order?.currency || "KES";
+    const contentCategory = virtualTicket ? "virtual_ticket" : "physical_ticket";
 
-    if (result.paid) {
+    if (result.paid && orderAmount > 0) {
       await sendMetaPurchaseServerEvent({
         eventId: reference,
         value: orderAmount,
@@ -43,8 +45,17 @@ export default async function PaymentCallbackPage({
 
     return (
       <main style={mainStyle}>
+        {result.paid && orderAmount > 0 ? (
+          <MetaPurchaseEvent
+            eventId={reference}
+            orderId={result.order.id}
+            value={orderAmount}
+            currency={orderCurrency}
+            contentCategory={contentCategory}
+          />
+        ) : null}
         <section style={cardStyle}>
-          <p style={eyebrowStyle}>Men’s Conference 2026</p>
+          <p style={eyebrowStyle}>Men's Conference 2026</p>
           <div style={statusBadgeStyle}>{result.paid ? "Payment Confirmed" : "Payment Not Complete"}</div>
           <h1 style={titleStyle}>{result.paid ? "Your Ticket Is Ready" : "Please Complete Payment"}</h1>
 
@@ -55,8 +66,6 @@ export default async function PaymentCallbackPage({
 
           {result.paid ? (
             <div>
-              <MetaPurchaseEvent value={orderAmount} currency={orderCurrency} eventId={reference} />
-
               <p style={bodyTextStyle}>
                 Thank you. Your payment has been verified and your secure ticket has been issued.
               </p>
@@ -77,7 +86,12 @@ export default async function PaymentCallbackPage({
                   <p style={{ color: "#b8ac97", lineHeight: 1.6, marginBottom: 12 }}>
                     This order includes virtual access. Use the virtual access page for the online access details.
                   </p>
-                  <Link href="/schedule" style={textLinkStyle}>Open Virtual Access Page</Link>
+                  <Link
+                    href={virtualTicket ? `/schedule?ticketCode=${encodeURIComponent(virtualTicket.ticket_code)}` : "/schedule"}
+                    style={textLinkStyle}
+                  >
+                    Open Virtual Access Page
+                  </Link>
                 </div>
               ) : null}
             </div>

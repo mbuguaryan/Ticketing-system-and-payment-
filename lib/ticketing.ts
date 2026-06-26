@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { verifyPaystackTransaction } from "@/lib/paystack";
+import { buildCalendlyUrl, getSchedulingOption } from "@/lib/scheduling";
 
 export type CheckoutOrderInput = {
   eventSlug?: string;
@@ -215,7 +216,7 @@ export async function getTicketByCode(ticketCode: string) {
 
   const { data: ticket, error } = await supabase
     .from("tickets")
-    .select("*, ticket_types(name, code, delivery_mode, includes_zoom, requires_scheduling), ticket_orders(buyer_full_name, buyer_email, buyer_phone, amount_kes, paid_at, events(name, event_date, venue, city))")
+    .select("*, ticket_types(name, code, delivery_mode, includes_zoom, requires_scheduling), ticket_orders(id, status, buyer_full_name, buyer_email, buyer_phone, amount_kes, paid_at, metadata, events(name, event_date, venue, city))")
     .eq("ticket_code", ticketCode)
     .single();
 
@@ -224,4 +225,111 @@ export async function getTicketByCode(ticketCode: string) {
   }
 
   return ticket;
+}
+
+export async function getVirtualSchedulingAccess(ticketCode: string) {
+  const ticket = await getTicketByCode(ticketCode);
+
+  if (!ticket) {
+    return { ok: false, message: "Ticket not found.", ticket: null, calendlyUrl: null };
+  }
+
+  if (ticket.ticket_types?.delivery_mode !== "virtual") {
+    return { ok: false, message: "This ticket is not a virtual ticket.", ticket, calendlyUrl: null };
+  }
+
+  if (ticket.status !== "valid") {
+    return { ok: false, message: `Ticket status is ${ticket.status}.`, ticket, calendlyUrl: null };
+  }
+
+  if (ticket.ticket_orders?.status !== "paid" && !ticket.ticket_orders?.paid_at) {
+    return { ok: false, message: "Virtual access is available only after payment confirmation.", ticket, calendlyUrl: null };
+  }
+
+  const option = getSchedulingOption("virtual-ticket-zoom");
+  const calendlyUrl = option
+    ? buildCalendlyUrl(option.calendlyUrl, {
+        ticketCode: ticket.ticket_code,
+        orderId: ticket.ticket_orders?.id,
+        buyerName: ticket.holder_name || ticket.ticket_orders?.buyer_full_name,
+        buyerEmail: ticket.holder_email || ticket.ticket_orders?.buyer_email,
+      })
+    : null;
+
+  return { ok: Boolean(calendlyUrl), message: calendlyUrl ? "Virtual access ready." : "Calendly URL is not configured.", ticket, calendlyUrl };
+}
+
+export async function prepareTicketDelivery(ticketCode: string) {
+  const ticket = await getTicketByCode(ticketCode);
+
+  if (!ticket) {
+    return null;
+  }
+
+  const isVirtual = ticket.ticket_types?.delivery_mode === "virtual";
+  const baseUrl = process.env.APP_BASE_URL || "http://localhost:3000";
+
+  return {
+    providerConnected: false,
+    ticketCode: ticket.ticket_code,
+    recipientName: ticket.holder_name,
+    recipientEmail: ticket.holder_email,
+    ticketUrl: `${baseUrl}/ticket/${encodeURIComponent(ticket.ticket_code)}`,
+    pdfUrl: `${baseUrl}/api/tickets/${encodeURIComponent(ticket.ticket_code)}/pdf`,
+    message: isVirtual
+      ? "Delivery provider is not connected. Share the ticket URL and virtual access page with the buyer."
+      : "Delivery provider is not connected. Share the ticket URL or PDF with the buyer.",
+    virtualAccessUrl: isVirtual ? `${baseUrl}/schedule?ticketCode=${encodeURIComponent(ticket.ticket_code)}` : null,
+  };
+}
+
+export async function checkInPhysicalTicketByCode(ticketCode: string) {
+  const supabase = getSupabaseAdmin();
+  const ticket = await getTicketByCode(ticketCode);
+
+  if (!ticket) {
+    await logCheckInAttempt(ticketCode, "not_found", "Ticket not found.");
+    return { ok: false, message: "Ticket not found." };
+  }
+
+  if (ticket.ticket_types?.delivery_mode === "virtual") {
+    await logCheckInAttempt(ticketCode, "blocked", "Virtual ticket gate check-in blocked.", ticket.id);
+    return { ok: false, message: "Virtual tickets cannot be checked in at the gate." };
+  }
+
+  if (ticket.status === "checked_in") {
+    await logCheckInAttempt(ticketCode, "already_checked_in", "Ticket is already checked in.", ticket.id);
+    return { ok: false, message: "Ticket is already checked in." };
+  }
+
+  if (ticket.status !== "valid") {
+    await logCheckInAttempt(ticketCode, "invalid_status", `Ticket status is ${ticket.status}.`, ticket.id);
+    return { ok: false, message: `Ticket status is ${ticket.status}.` };
+  }
+
+  const { error } = await supabase
+    .from("tickets")
+    .update({ status: "checked_in", checked_in: true, checked_in_at: new Date().toISOString() })
+    .eq("id", ticket.id)
+    .eq("status", "valid");
+
+  if (error) {
+    await logCheckInAttempt(ticketCode, "error", error.message || "Unable to check in ticket.", ticket.id);
+    throw new Error(error.message || "Unable to check in ticket.");
+  }
+
+  await logCheckInAttempt(ticketCode, "checked_in", "Ticket checked in.", ticket.id);
+  return { ok: true, message: "Ticket checked in." };
+}
+
+async function logCheckInAttempt(ticketCode: string, result: string, detail: string, ticketId?: string) {
+  const supabase = getSupabaseAdmin();
+
+  await supabase.from("checkin_logs").insert({
+    ticket_id: ticketId || null,
+    ticket_code: ticketCode,
+    result,
+    actor_label: "admin_key",
+    detail,
+  });
 }

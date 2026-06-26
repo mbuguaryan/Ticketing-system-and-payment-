@@ -11,17 +11,26 @@ declare global {
 }
 
 type MetaPurchaseEventProps = {
+  eventId: string;
   value: number;
   currency?: string;
-  eventId: string;
+  orderId?: string;
+  contentCategory?: string;
 };
 
 export default function MetaPurchaseEvent({
+  eventId,
   value,
   currency = "KES",
-  eventId,
+  orderId,
+  contentCategory,
 }: MetaPurchaseEventProps) {
   useEffect(() => {
+    if (value <= 0) return;
+
+    const eventKey = `meta_purchase_${eventId}`;
+    if (window.sessionStorage.getItem(eventKey)) return;
+
     let attempts = 0;
     let timeoutId: number | undefined;
 
@@ -35,10 +44,15 @@ export default function MetaPurchaseEvent({
           {
             value: Number(value.toFixed(2)),
             currency,
+            content_name: "Men Conference Nairobi 2026",
+            content_type: "event_ticket",
+            ...(contentCategory ? { content_category: contentCategory } : {}),
+            ...(orderId ? { order_id: orderId } : {}),
             test_event_code: META_TEST_EVENT_CODE,
           },
           { eventID: eventId }
         );
+        window.sessionStorage.setItem(eventKey, "1");
         return;
       }
 
@@ -54,7 +68,7 @@ export default function MetaPurchaseEvent({
         window.clearTimeout(timeoutId);
       }
     };
-  }, [currency, eventId, value]);
+  }, [contentCategory, currency, eventId, orderId, value]);
 
   return null;
 }

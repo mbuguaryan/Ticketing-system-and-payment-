@@ -19,6 +19,8 @@ export function normalizeCheckoutInput(input: Record<string, unknown>): Checkout
 export function validateCheckoutInput(input: CheckoutInput): string | null {
   if (input.fullName.length < 2) return "Full name is required.";
   if (!input.email.includes("@")) return "A valid email is required.";
+  if (!input.phone) return "Phone number is required.";
+  if (input.phone.replace(/\D/g, "").length < 7) return "A valid phone number is required.";
   if (!input.ticketTypeId) return "Ticket type is required.";
   if (!Number.isInteger(input.quantity) || input.quantity < 1 || input.quantity > 20) {
     return "Quantity must be between 1 and 20.";
