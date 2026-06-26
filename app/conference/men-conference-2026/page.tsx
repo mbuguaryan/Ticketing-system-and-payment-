@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ConferenceCheckout from "@/app/components/ConferenceCheckout";
 import { ticketTypes } from "@/lib/ticket-types";
 
@@ -53,36 +54,48 @@ export default function ConferencePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
       />
-      <section style={{ maxWidth: 960, margin: "0 auto", padding: "18px 14px 64px" }}>
+      <section style={{ maxWidth: 960, margin: "0 auto", padding: "12px 12px 64px" }}>
         <div
           style={{
             border: "1px solid #3a2b14",
-            borderRadius: 24,
+            borderRadius: 22,
             overflow: "hidden",
-            background: "#150f09",
+            background: "#050302",
             boxShadow: "0 24px 70px rgba(0,0,0,.45)",
+            maxWidth: 760,
+            margin: "0 auto",
           }}
         >
-          <img
+          <Image
             src="/mens-conference-poster.jpeg"
-            alt="Men’s Conference 2026 poster"
-            style={{ width: "100%", display: "block" }}
+            alt="Men's Conference 2026 poster"
+            width={1360}
+            height={1600}
+            priority
+            quality={92}
+            sizes="(max-width: 480px) 94vw, (max-width: 960px) 82vw, 760px"
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+              objectFit: "contain",
+            }}
           />
         </div>
 
-        <section style={{ padding: "28px 4px 0" }}>
+        <section style={{ padding: "24px 4px 0" }}>
           <p style={{ color: "#d6a84f", fontWeight: 900, letterSpacing: 2, margin: 0 }}>
             KEITH MUOKI PRESENTS
           </p>
           <h1
             style={{
-              fontSize: "clamp(42px, 10vw, 88px)",
+              fontSize: "clamp(38px, 10vw, 82px)",
               lineHeight: 0.92,
-              margin: "16px 0",
+              margin: "14px 0",
               letterSpacing: -3,
             }}
           >
-            Men’s Conference 2026
+            Men's Conference 2026
           </h1>
           <p style={{ color: "#d8c9ae", fontSize: 20, lineHeight: 1.6, maxWidth: 760 }}>
             A powerful gathering for men ready to rise in leadership, purpose, mindset, family,

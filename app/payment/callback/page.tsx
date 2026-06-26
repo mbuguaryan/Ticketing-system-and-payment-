@@ -1,5 +1,6 @@
 import Link from "next/link";
 import MetaPurchaseEvent from "@/app/components/MetaPurchaseEvent";
+import { sendMetaPurchaseServerEvent } from "@/lib/meta-conversions-api";
 import { finalizePaystackPayment } from "@/lib/ticketing";
 
 export default async function PaymentCallbackPage({
@@ -27,21 +28,34 @@ export default async function PaymentCallbackPage({
     const result = await finalizePaystackPayment(reference);
     const firstTicket = result.tickets[0];
     const virtualTicket = result.tickets.find((ticket) => ticket.ticket_types?.delivery_mode === "virtual");
-    const purchaseValue = Number(result.order?.amount_kes || 0);
+    const orderAmount = Number(result.order?.amount_kes || 0);
+    const orderCurrency = result.order?.currency || "KES";
     const contentCategory = virtualTicket ? "virtual_ticket" : "physical_ticket";
+
+    if (result.paid && orderAmount > 0) {
+      await sendMetaPurchaseServerEvent({
+        eventId: reference,
+        value: orderAmount,
+        currency: orderCurrency,
+        email: result.order.buyer_email,
+        phone: result.order.buyer_phone,
+        eventSourceUrl: `${process.env.APP_BASE_URL || "https://mensconference.keithmuoki.com"}/payment/callback?reference=${encodeURIComponent(reference)}`,
+      });
+    }
 
     return (
       <main style={mainStyle}>
-        {result.paid && purchaseValue > 0 ? (
+        {result.paid && orderAmount > 0 ? (
           <MetaPurchaseEvent
+            eventId={reference}
             orderId={result.order.id}
-            value={purchaseValue}
-            currency="KES"
+            value={orderAmount}
+            currency={orderCurrency}
             contentCategory={contentCategory}
           />
         ) : null}
         <section style={cardStyle}>
-          <p style={eyebrowStyle}>Men’s Conference 2026</p>
+          <p style={eyebrowStyle}>Men's Conference 2026</p>
           <div style={statusBadgeStyle}>{result.paid ? "Payment Confirmed" : "Payment Not Complete"}</div>
           <h1 style={titleStyle}>{result.paid ? "Your Ticket Is Ready" : "Please Complete Payment"}</h1>
 
